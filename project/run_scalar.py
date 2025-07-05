@@ -2,15 +2,19 @@
 Be sure you have minitorch installed in you Virtual Env.
 >>> pip install -Ue .
 """
+
 import random
 
 import minitorch
 
 
 class Network(minitorch.Module):
-    def __init__(self, hidden_layers):
+    def __init__(self, hidden_layers: int):
         super().__init__()
-        raise NotImplementedError("Need to include this file from past assignment.")
+        # TODO: Implement for Task 1.5.
+        self.layer1 = Linear(2, hidden_layers)
+        self.layer2 = Linear(hidden_layers, hidden_layers)
+        self.layer3 = Linear(hidden_layers, 1)
 
     def forward(self, x):
         middle = [h.relu() for h in self.layer1.forward(x)]
@@ -19,10 +23,13 @@ class Network(minitorch.Module):
 
 
 class Linear(minitorch.Module):
-    def __init__(self, in_size, out_size):
+    def __init__(self, in_size: int, out_size: int):
         super().__init__()
-        self.weights = []
-        self.bias = []
+        self.weights: list[
+            list[minitorch.Scalar]
+        ] = []  # for each in_size index i we create j out_size weights
+        self.bias: list[minitorch.Scalar] = []  # we create out_size j parameters
+
         for i in range(in_size):
             self.weights.append([])
             for j in range(out_size):
@@ -31,6 +38,7 @@ class Linear(minitorch.Module):
                         f"weight_{i}_{j}", minitorch.Scalar(2 * (random.random() - 0.5))
                     )
                 )
+
         for j in range(out_size):
             self.bias.append(
                 self.add_parameter(
@@ -38,8 +46,13 @@ class Linear(minitorch.Module):
                 )
             )
 
-    def forward(self, inputs):
-        raise NotImplementedError("Need to include this file from past assignment.")
+    def forward(self, inputs) -> list[any]:
+        # TODO: Implement for Task 1.5.
+        y = [b.value for b in self.bias]
+        for i, x in enumerate(inputs):
+            for j in range(len(y)):
+                y[j] = y[j] + x * self.weights[i][j].value
+        return y
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
